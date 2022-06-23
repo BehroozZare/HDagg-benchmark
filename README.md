@@ -7,7 +7,7 @@
 # HDagg
  [Hybrid Aggregation of Loop-carried
 Dependence Iterations in Sparse Matrix
-Computations (HDagg)](https://www.cs.toronto.edu/~mmehride/papers/HDag.pdf). is a DAG partitioning/scheduling algorithm used for making sparse matrix loops parallel.
+Computations (HDagg)](https://www.cs.toronto.edu/~mmehride/papers/HDag.pdf) is a DAG partitioning/scheduling algorithm used for making sparse matrix loops parallel.
  It can be used within code generators or libraries. It is integrated into Sympiler framework.
  This repository is the opensource reference implementation of the IPDPS 2022 paper.
  For more information see [Sympiler documents](https://www.sympiler.com/docs/lbc/).
