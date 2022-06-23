@@ -78,7 +78,7 @@ namespace sym_lib
     }
 
 
-    int build_levelSet_CSC_V2(size_t n, const int *Lp, const int *Li,
+    int build_levelSet_CSC(size_t n, const int *Lp, const int *Li,
                            int *levelPtr, int *levelSet)
     {
         int begin = 0, end = n - 1;
@@ -1237,6 +1237,179 @@ namespace sym_lib
 		return (top);		  /* s [top..n-1] contains pattern of L(k,:)*/
 	}
 
+
+
+
+    timing_measurement computingGroupedDAG_CSR(const CSR* A, std::vector<int>& DAG_ptr, std::vector<int>& DAG_set,
+                                               std::vector<int>& groupPtr, std::vector<int>& groupSet, int& ngroup){
+        timing_measurement  DAG_time;
+        DAG_time.start_timer();
+
+        int n = A->n;
+        int nnz = A->nnz;
+        groupPtr.resize(n + 1, 0);
+        groupSet.resize(n, 0);
+        std::vector<int> groupInv(n, 0);
+
+        group g(A->n, A->p, A->i);
+        g.inspection_sptrsvcsr_v1(groupPtr.data(), groupSet.data(), ngroup, groupInv.data());
+
+        std::vector<std::vector<int>> DAG;
+        DAG.resize(ngroup);
+
+        fs_csr_inspector_dep(ngroup, groupPtr.data(), groupSet.data(), groupInv.data(), A->p, A->i, DAG);
+
+        size_t count=0;
+        for(int j = 0; j < DAG.size(); ++j) {
+            DAG[j].erase(std::unique(DAG[j].begin(), DAG[j].end()), DAG[j].end());
+            count+=DAG[j].size();
+        }
+        DAG_ptr.resize(n + 1, 0);
+        DAG_set.resize(count + n, 0);
+
+        long int cti,edges=0;
+        for(cti = 0, edges = 0; cti < ngroup; cti++){
+            DAG_ptr[cti] = edges;
+            DAG_set[edges++] = cti;
+            for(int ctj = 0; ctj < DAG[cti].size(); ctj++) {
+                DAG_set[edges++] = DAG[cti][ctj];
+            }
+        }
+        DAG_ptr[cti] = edges;
+        DAG_time.measure_elapsed_time();
+
+        std::vector<bool> check(n, false);
+        return DAG_time;
+    }
+
+
+    timing_measurement computingGroupedDAG_CSR(int n, std::vector<int>& CSR_DAG_ptr, std::vector<int>& CSR_DAG_set,
+                                               std::vector<int>& DAG_ptr, std::vector<int>& DAG_set,
+                                               std::vector<int>& groupPtr, std::vector<int>& groupSet, int& ngroup){
+        timing_measurement  DAG_time;
+        DAG_time.start_timer();
+
+        groupPtr.resize(n + 1, 0);
+        groupSet.resize(n, 0);
+        std::vector<int> groupInv(n, 0);
+
+        group g(n, CSR_DAG_ptr.data(), CSR_DAG_set.data());
+        g.inspection_sptrsvcsr_v1(groupPtr.data(), groupSet.data(), ngroup, groupInv.data());
+
+        std::vector<std::vector<int>> DAG;
+        DAG.resize(ngroup);
+
+        fs_csr_inspector_dep(ngroup, groupPtr.data(), groupSet.data(),
+                             groupInv.data(), CSR_DAG_ptr.data(), CSR_DAG_set.data(), DAG);
+
+        size_t count=0;
+        for(int j = 0; j < DAG.size(); ++j) {
+            DAG[j].erase(std::unique(DAG[j].begin(), DAG[j].end()), DAG[j].end());
+            count+=DAG[j].size();
+        }
+        DAG_ptr.resize(n + 1, 0);
+        DAG_set.resize(count + n, 0);
+
+        long int cti,edges=0;
+        for(cti = 0, edges = 0; cti < ngroup; cti++){
+            DAG_ptr[cti] = edges;
+            DAG_set[edges++] = cti;
+            for(int ctj = 0; ctj < DAG[cti].size(); ctj++) {
+                DAG_set[edges++] = DAG[cti][ctj];
+            }
+        }
+        DAG_ptr[cti] = edges;
+        DAG_time.measure_elapsed_time();
+
+        std::vector<bool> check(n, false);
+        return DAG_time;
+    }
+
+
+
+
+    /*
+     * @brief Computing Data Dependency Graph of the kernel and store it in CSC format
+     * @param A Matrix A in CSR version
+     * @return DAG_ptr The pointer array in CSC format
+     * @return DAG_set The index array in CSC format. It stores the child of each node
+    */
+    timing_measurement computingDAG_CSR(const CSR* A, std::vector<int>& DAG_ptr, std::vector<int>& DAG_set){
+        timing_measurement  DAG_time;
+        int n_ = A->n;
+        DAG_time.start_timer();
+
+        std::vector<std::vector<int>> DAG;
+        DAG.resize(A->n);
+        fs_csr_inspector_dep(A->n, A->p, A->i, DAG);
+        size_t count = 0;
+        for (auto & j : DAG){
+            j.erase(std::unique(j.begin(), j.end()), j.end());
+            count += j.size();
+        }
+
+        DAG_ptr.reserve(n_ + 1);
+        DAG_set.resize(count + n_);
+
+        long int cti, edges = 0;
+        for (cti = 0, edges = 0; cti < n_; cti++)
+        {
+            // for each edge (cti, ctj), save the starting point for ctjs of cti
+            DAG_ptr.push_back(edges);
+            // Add the (cti,cti) edge because it is not inside the DAG
+            DAG_set[edges] = cti;
+            edges++;
+            // Iterate over all the dependent ctjs that is cti -> ctj
+            for(int ctj = 0; ctj < DAG[cti].size(); ctj++)
+            {
+                // Add the edge into the graph_edge_idx
+                DAG_set[edges] = DAG[cti][ctj];
+                edges++;
+            }
+        }
+        // This is the number of all the edges, just like CSR or CSC format
+        DAG_ptr.push_back(edges);
+        DAG_time.measure_elapsed_time();
+        return DAG_time;
+    }
+
+
+
+    timing_measurement computingLevelSet_CSC(int n, const int* DAG_ptr, const int* DAG_set,
+                                             std::vector<int>& LevelPtr, std::vector<int>& LevelSet, int& nlevels){
+        timing_measurement LevelSet_time;
+        LevelSet_time.start_timer();
+        LevelPtr.resize(n + 1);
+        LevelSet.resize(n);
+        nlevels = build_levelSet_CSC(n, DAG_ptr, DAG_set,
+                                        LevelPtr.data(), LevelSet.data());
+        LevelSet_time.measure_elapsed_time();
+        return LevelSet_time;
+    }
+
+    /*
+     * @brief assign the nodes' level to each node and store it in Node2Level
+     * @param LevelPtr The pointer array in CSC format
+     * @param LevelSet The index array in CSC format
+     * @param nlevels Number of levels
+     * @param num_nodes
+     * @return Node2Level array that stores the data
+     */
+    timing_measurement computingNode2Level(const std::vector<int>& LevelPtr, const std::vector<int>& LevelSet, int nlevels,
+                                           int num_nodes, std::vector<int>& Node2Level){
+        timing_measurement Node2Level_time;
+        Node2Level_time.start_timer();
+        Node2Level.resize(num_nodes);
+        for (int lvl = 0; lvl < nlevels; ++lvl) {
+            for (int j = LevelPtr[lvl]; j < LevelPtr[lvl + 1]; ++j) {
+                int node = LevelSet[j];
+                Node2Level[node] = lvl;
+            }
+        }
+
+        Node2Level_time.measure_elapsed_time();
+        return Node2Level_time;
+    }
 
 
 

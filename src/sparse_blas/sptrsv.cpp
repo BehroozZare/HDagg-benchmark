@@ -10,14 +10,6 @@
 namespace sym_lib
 {
     //=========================== Left Looking SpTrSv ==========================
-    /*
-     * It is left looking Sparse Triangular Solve
-     * @param n Number of iterations or node
-     * @param Lp the pointer array in CSC version
-     * @param Li the index array in CSC version
-     * @param Lx the value array in CSC version
-     * @return x the output
-     */
     void sptrsv_csr(int n, int *Lp, int *Li, double *Lx, double *x)
       {
 //            int i, j;
@@ -29,20 +21,10 @@ namespace sym_lib
             }
       }
 
-    /*
-    * It is left looking Sparse Triangular Solve
-    * @param n Number of iterations or node
-    * @param Lp the pointer array in CSC version
-    * @param Li the index array in CSC version
-    * @param Lx the value array in CSC version
-    * @return x the output
-    * @param levels number of levels in the DAg
-    * @param levelPtr the pointer array in CSC format
-    * that point to starting and ending point of nodes in a level
-    * @param LevelSet the array that store nodes sorted based on their level
-    */
-    void sptrsv_csr_levelset(int n, const int *Lp, const int *Li, const double *Lx, double *x,
-                               int levels, const int *levelPtr, const int *levelSet)
+
+    void sptrsv_csr_levelset(int n, const int *Lp, const int *Li, const double *Lx,
+                               int levels, const int *levelPtr, const int *levelSet,
+                             double *x)
       {
             #pragma omp parallel
             {

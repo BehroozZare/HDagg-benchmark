@@ -8,20 +8,22 @@
 #include <vector>
 #include "def.h"
 
+
 namespace sym_lib{
 
 /// Comparing two time struct
-/// \param a
-/// \param b
-/// \return
+/// \param<[in] first time
+/// \param<[in] second time
+/// \return a boolian value
  bool time_cmp(timing_measurement a, timing_measurement b);
 
 
  /// Finding the median time
- /// \param time_array
- /// \return
+ /// \param<[in] time_array
+ /// \return< the median value
  timing_measurement
- time_median(std::vector<timing_measurement> time_array);
+ time_median(std::vector<timing_measurement> time_array
+ );
 
 
 /// Safely compute a*k, where k should be small, and check for integer overflow.
@@ -82,6 +84,9 @@ size_t mult_size_t(size_t a, size_t k, int *ok);
   for (int i = 0; i < n; ++i) sum += vec[i];
   return sum;
  }
+
+
+
 
 }
 #endif //PROJECT_UTILS_H

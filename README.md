@@ -3,11 +3,23 @@
 ![example workflow](https://github.com/sympiler/lbc/actions/workflows/cmakeUbuntu.yml/badge.svg)
 ![example workflow](https://github.com/sympiler/lbc/actions/workflows/cmakeMac.yml/badge.svg)
 
-# Load-balance Level Coarsening (LBC)
-Load-balance Level Coarsening is a DAG partitionig/scheduling
-algorithm used for making sparse matrix loops parallel.
-It can be used within code generators or libraries. For more information see
-[Sympiler documents](https://www.sympiler.com/docs/lbc/).
+
+# HDagg
+ [Hybrid Aggregation of Loop-carried
+Dependence Iterations in Sparse Matrix
+Computations (HDagg)](https://www.cs.toronto.edu/~mmehride/papers/HDag.pdf). is a DAG partitioning/scheduling algorithm used for making sparse matrix loops parallel.
+ It can be used within code generators or libraries. It is integrated into Sympiler framework.
+ This repository is the opensource reference implementation of the IPDPS 2022 paper.
+ For more information see [Sympiler documents](https://www.sympiler.com/docs/lbc/).
+
+## Files
+
+* `src/`: source code
+* `cmake/` and `CMakeLists.txt`: CMake files
+* `input/`: input folder where matrices reside
+* `output/`: output folder to store data
+* `demo/`: example folder to show HDagg usage
+* `scripts/`: Python and Bash scripts for generating and processing results
 
 ## Install
 
@@ -24,9 +36,19 @@ First following items should be installed:
   you probably need to install OpenMP using `homebrew install libomp`. You can
 * also install LLVM usng `brew install llvm` which support OpenMP natively.
 
+#### MKL
+The cmake currently supports mkl library inside oneapi. To use it, please provide `$MKLROOT` environmental variable using `export MKLROOT=<your-address>/make/latest`.  
+* For example: `export MKLROOT=/opt/intel/oneapi/mkl/latest/` 
+
+#### Relative Works:
+
+You can switch the `HDAGG_WITH_SPMP` and `HDAGG_WITH_DAGP` options in `CMakeLists.txt` 
+to add the [SpMP](https://github.com/IntelLabs/SpMP) or [DAGP](https://github.com/GT-TDAlab/dagP). To use these tools,
+after installation, provide their addresses using `$SPMPROOT` and `$DAGPROOT`.
+* For example: `export SPMPROOT=/home/behrooz/SpMP`
 
 ### Build
-Then build LBC, using the following:
+Then build HDagg, using the following:
 
 ```bash
 mkdir build
@@ -41,13 +63,8 @@ a different compiler. For example:
 `cmake -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc\@9/9.3.0_2/bin/g++-9
 -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc\@9/9.3.0_2/bin/gcc-9 ..`
 
-## Profiling
-You can install papi in Ubuntu using `apt install papi-tools` and then you
-should be able to use profiling utils. You can install papi yourself and
-passed installtion path using `-DCMAKE_PREFIX_PATH=`.
+## Run
 
-## Example
-The example directory shows how to call LBC API and iterate over
-the created partitioning. For more examples on how LBC is used for
-making loops with sparse dependencies parallel, please check
-[Sympiler Git repo](https://github.com/sympiler/sympiler).
+For each executable file the inputs is as follows: `./<executable_address> <matrix_address> <num_threads>` 
+for example: `./build/demo/HDAGG_SpTRSV input/apache2.mtx 10`
+

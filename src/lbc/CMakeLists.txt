@@ -12,4 +12,4 @@ add_library (lbc STATIC
         lbc_csc_dag.cpp
         ${SPARSE_UTIL_SRC}/sparse_utilities.cpp
         ${SPARSE_UTIL_SRC}/etree.cpp
-        ${SPARSE_UTIL_SRC}/utils.cpp ../GLC/includes/glc.h)
+        ${SPARSE_UTIL_SRC}/utils.cpp ../hdagg/includes/hdagg.h)

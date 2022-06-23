@@ -24,10 +24,16 @@
 #include "SuperNodalTools.h"
 #include "BCSCMatrix.h"
 #include "BLAS.h"
+
+#ifdef SPMP
+
 #include <LevelSchedule.hpp>
 #include <synk/barrier.hpp>
 
-namespace GLC{
+#endif
+
+
+namespace HDAGG{
     enum Kernel { SpTrSv_LL, SpTrSv_RL, SpICh0_LL, SpICh0_RL, SpICh0_UL, SpILU0_UL, General };
     struct twoDIteration{
         int i;
@@ -35,8 +41,11 @@ namespace GLC{
         int j;
     };
 
+#ifdef SPMP
+
     void Convert_LBC_CSR_to_SpMP(CSR* LBC_A, SpMP::CSR* SpMP_A);
 
+#endif
     bool sortbyfirst(const twoDIteration& a, const twoDIteration& b);
 
     bool sortbysec(const twoDIteration& a, const twoDIteration& b);
@@ -108,7 +117,7 @@ namespace GLC{
                      int *node2partition);
 
 
-    ///\description: Given the WM vectr and levelset information and chunk sizes drove by the GLC load balance
+    ///\description: Given the WM vectr and levelset information and chunk sizes drove by the HDAGG load balance
     ///unit it will provide the merged level schedule
     ///\input num_threads: The number of cores that required for the computation
     ///\input n: number of nodes in the DAG
@@ -141,7 +150,7 @@ namespace GLC{
                          bool postOrder);
 
 
-    ///\description: This unit find the CCs in each iteration of the GLC algorithm
+    ///\description: This unit find the CCs in each iteration of the HDAGG algorithm
     /// and it will generate the cost of each CC and their positions
     ///\input lb_level: The starting level that merging happens from it (inclusive)
     ///\input computed_up_to: The level that we already want to merge levels with
@@ -186,17 +195,17 @@ namespace GLC{
     ///\input sparsification: Should we sparsify the DAG or not?
     ///\input sort: Sort the serial's chunk based on the node id?
     ///\return WM: it will return the WM vector for analysis
-    std::vector<int> GLC(int n, int nnz,
-             std::vector<int> & DAG_ptr_not_prune, std::vector<int> & DAG_set_not_prune,
-             const std::vector<double> & node_cost,
-             int cores,
-             int & coarse_level_no,
-             std::vector<int> & coarse_level_ptr,
-             std::vector<int> & coarse_part_ptr,
-             std::vector<int> & coarse_node_ptr,
-             bool parallelLevelset = false,
-             bool PostOrder = false,
-             bool bin_pack = true);
+    std::vector<int> HDAGG(int n, int nnz,
+                           std::vector<int> & DAG_ptr_not_prune, std::vector<int> & DAG_set_not_prune,
+                           const std::vector<double> & node_cost,
+                           int cores,
+                           int & coarse_level_no,
+                           std::vector<int> & coarse_level_ptr,
+                           std::vector<int> & coarse_part_ptr,
+                           std::vector<int> & coarse_node_ptr,
+                           bool parallelLevelset = false,
+                           bool PostOrder = false,
+                           bool bin_pack = true);
 
 
     std::vector<int> GLC_V2(int n, int nnz,
@@ -414,13 +423,18 @@ namespace GLC{
                                 std::vector<int>& DAG_ptr, std::vector<int>& DAG_set);
 
 
-    ///\Description This is a parallel Levelset function which works on a DAG in CSC version
+#ifdef SPMP
+
+    ///\Description This is a parallel Levelset function which works on
+    /// a DAG in CSC version and uses SPMP levelset implementation
     ///\input A: The full matrix A in SpMP CSR format
     ///\input nthreads: Number of parallel threads
     ///\output level_ptr: Pointer to the Levelset array
     ///\output level_set: Nodes in the levelset are sort based on their level
     ///\return nlevels: Number of levels => if == -1 means the input graph has cycle
     int levelsetCSRParallel_SpMP(SpMP::CSR* A, int nthreads, std::vector<int>& level_ptr, std::vector<int>& level_set);
+
+#endif
 
 
 

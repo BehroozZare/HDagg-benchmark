@@ -29,9 +29,11 @@ project(HDAGG DESCRIPTION "A upgraded version of LBC library with HDagg function
 ################################################################################
 
 #Project options
-option(HDAGG_WITH_SPMP "Use SpMP library with HDAGG" ON)
+option(HDAGG_WITH_SPMP "Use SpMP library with HDAGG" OFF)
+option(HDAGG_WITH_DAGP "Add DAGP for benchmarking" OFF)
+
 option(HDAGG_WITH_DEMO "Add demo executables" ON)
-option(HDAGG_WITH_DAGP "Add DAGP for benchmarking" OFF) #This functionality is not working
+
 
 
 ################################################################################
@@ -49,7 +51,7 @@ include(${PROJECT_NAME}Dependencies)
 # project source files
 file(GLOB SRCFILES
         "src/dense_blas/*.cpp"
-        "src/GLC/*.cpp"
+        "src/hdagg/*.cpp"
         "src/Group/*.cpp"
         "src/lbc/*.cpp"
         "src/profiler/*.cpp"
@@ -62,7 +64,7 @@ add_library(${PROJECT_NAME}_lib ${SRCFILES})
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
         "src/dense_blas/includes"
-        "src/GLC/includes"
+        "src/hdagg/includes"
         "src/Group/includes"
         "src/lbc/includes"
         "src/profiler/includes"
@@ -77,7 +79,10 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 
 add_compile_options(-Wno-write-strings)
 add_compile_options(-Wunused-result)
-add_compile_options(-march=native)
+
+
+find_package(OpenMP REQUIRED)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC OpenMP::OpenMP_CXX)
 
 # Figure out SSE level support
 message(STATUS "Seaching for SSE...")
@@ -99,7 +104,7 @@ target_compile_options(${PROJECT_NAME}_lib PUBLIC ${SIMD_FLAGS})
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-# Use C++17
+# Use C++11
 target_compile_features(${PROJECT_NAME}_lib PUBLIC cxx_std_17)
 
 ################################################################################
@@ -138,12 +143,13 @@ if(EXISTS "${MKL_INCLUDE_DIRS}")
             ${MKL_GNU_THREAD}
             ${PTHREAD}
             ${IOMP5}
-            ${MKL_INTEL_THREAD}
             ${MKL_SEQUENTIAL}
+            ${MKL_INTEL_THREAD}
             ${MKL_CORE}
             ${M}
             ${DL}
             )
+
 else()
     message(STATUS "Intel MKL not found, building without MKL.")
     set(MKL 0)
@@ -152,15 +158,15 @@ endif()
 
 ### Check whether DAGP root exists - Relative works
 if(HDAGG_WITH_DAGP)
-    if(EXISTS "${DAGP_ROOT}")
-        message(STATUS "The DAGP is found - ${DAGP_ROOT}.")
+    if(EXISTS "$ENV{DAGPROOT}")
+        message(STATUS "The DAGP is found - $ENV{DAGPROOT}.")
         target_include_directories(${PROJECT_NAME}_lib PUBLIC
-                "${DAGP_ROOT}/src/recBisection/"
-                "${DAGP_ROOT}/src/common/"
+                "$ENV{DAGPROOT}/src/recBisection/"
+                "$ENV{DAGPROOT}/src/common/"
                 "src/utils/external/DAGPInterface/includes"
                 )
         target_link_libraries(${PROJECT_NAME}_lib PUBLIC
-                "${DAGP_ROOT}/lib/libdagp.a"
+                "$ENV{DAGPROOT}/lib/libdagp.a"
                 "src/utils/external/DAGPInterface/*.cpp"
                 )
         add_definitions(-DDAGP)
@@ -172,7 +178,7 @@ endif()
 ### Check whether SPMP root exists - Relative works
 if(HDAGG_WITH_SPMP)
     if(EXISTS "$ENV{SPMPROOT}")
-        message(STATUS "The SpMP is found - $ENV{SPMPROOT}.")
+        message(STATUS "Found SpMP - $ENV{SPMPROOT}.")
         target_include_directories(${PROJECT_NAME}_lib PUBLIC
                 $ENV{SPMPROOT}
                 "src/utils/external/SpMPInterface/includes"

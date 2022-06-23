@@ -6,38 +6,32 @@
 #define FUSION_SPARSEBLASLIB_H
 
 #include "def.h"
-namespace sym_lib
-{
 
-    ///////////////////////// SPTRSV
+namespace sym_lib {
 
-    /*
-     * It is left looking Sparse Triangular Solve
-     * @param n Number of iterations or node
-     * @param Lp the pointer array in CSC version
-     * @param Li the index array in CSC version
-     * @param Lx the value array in CSC version
-     * @return x the output
-     */
-    void
-    sptrsv_csr(int n, int *Lp, int *Li, double *Lx, double *x);
+    //============================= SPTRSV ============================
+    ///\description It is left looking Sparse Triangular Solve
+    ///\input n Number of iterations or node
+    ///\input Lp the pointer array in CSC version
+    ///\input Li the index array in CSC version
+    ///\input Lx the value array in CSC version
+    ///\inout x the output
+    void sptrsv_csr(int n, int *Lp, int *Li, double *Lx, double *x);
 
-    /*
-    * It is left looking Sparse Triangular Solve
-    * @param n Number of iterations or node
-    * @param Lp the pointer array in CSC version
-    * @param Li the index array in CSC version
-    * @param Lx the value array in CSC version
-    * @return x the output
-    * @param levels number of levels in the DAg
-    * @param levelPtr the pointer array in CSC format
-    * that point to starting and ending point of nodes in a level
-    * @param LevelSet the array that store nodes sorted based on their level
-    */
-    void
-    sptrsv_csr_levelset(int n, const int *Lp, const int *Li, const double *Lx,
-                        double *x,
-                        int levels, const int *levelPtr, const int *levelSet);
+
+    ///\Description It is a parallel left looking Sparse Triangular Solve which uses wavefronts schedule
+    ///\input n Number of iterations or node
+    ///\input Lp the pointer array in CSC version
+    ///\input Li the index array in CSC version
+    ///\input Lx the value array in CSC version
+    ///\input levels number of levels in the DAg
+    ///\input levelPtr the pointer array in CSC format
+    /// that point to starting and ending point of nodes in a level
+    ///\input LevelSet the array that store nodes sorted based on their level
+    ///\inout x the output
+    void sptrsv_csr_levelset(int n, const int *Lp, const int *Li, const double *Lx,
+                        int levels, const int *levelPtr, const int *levelSet,
+                        double *x);
 
     /*
      * It is left looking Sparse Triangular Solve
@@ -76,7 +70,6 @@ namespace sym_lib
                    int *par_ptr, int *partition);
 
 
-
     /**
     * @brief perform SpTrsv_CSR based on grouping and LBC
     * @param n number of rows
@@ -97,8 +90,8 @@ namespace sym_lib
 
     void
     sptrsv_csr_lbc_buffer(int n, int *Lp, int *Li, double *Lx, double *x,
-                   int level_no, int *level_ptr,
-                   int *par_ptr, int *partition);
+                          int level_no, int *level_ptr,
+                          int *par_ptr, int *partition);
 
     void
     sptrsv_csr_lbc_double_buffer(int n, int *Lp, int *Li, double *Lx, double *x, double *x_copy,
@@ -106,12 +99,9 @@ namespace sym_lib
                                  int *par_ptr, int *partition);
 
 
-
     void sptrsv_csr_lbc_seq(int n, int *Lp, int *Li, double *Lx, double *x,
                             int level_no, int *level_ptr,
                             int *par_ptr, int *partition);
-
-
 
 
     /**
@@ -299,7 +289,8 @@ namespace sym_lib
      * @param par_ptr: The pointer that shows the nodes inside each w-partition (think of it as two CSC on top of each other)
      * @param partition: the nodes sorted based on the w-partitions that they are in
      */
-    void spico_csc_RL_lbc(int n, int *Lp, int *Li, double *Lx, int level_no, int *level_ptr, int *par_ptr, int *partition);
+    void
+    spico_csc_RL_lbc(int n, int *Lp, int *Li, double *Lx, int level_no, int *level_ptr, int *par_ptr, int *partition);
 
     /*
      * @brief Right looking incomplete cholesky
@@ -315,22 +306,18 @@ namespace sym_lib
      * @param groupSet the array set for groups. Nodes are sorted based on their group
      */
     void spico_csc_RL_group_lbc(int n, int *Lp, int *Li, double *Lx,
-                             int level_no, int *level_ptr,
-                             int *par_ptr, int *partition, int *groupPtr, int *groupSet);
+                                int level_no, int *level_ptr,
+                                int *par_ptr, int *partition, int *groupPtr, int *groupSet);
 
 
     void spico_csc_lbc_reordered(int n, double *val, int *rowPtr, int *colIdx,
-                       int level_no, int *level_ptr,
-                       int *par_ptr, int *partition);
-
-
+                                 int level_no, int *level_ptr,
+                                 int *par_ptr, int *partition);
 
 
     void spico_csc_group_levelset_v2(int n, const int *Lp, const int *Li, double *Lx,
                                      int levels, const int *levelPtr,
                                      const int *levelSet, int *groupPtr, int *groupSet);
-
-
 
 
     void spico_csc_lbc(int n, double *Lx, int *Lp, int *Li,
@@ -353,7 +340,7 @@ namespace sym_lib
      * index set in CSR format of row j of the input matrix
      */
     bool spic0_csc_LL_serial(int n, const int *Lp, const int *Li, double *Lx,
-                    const int* PrunePtr, const int* PruneSet);
+                             const int *PrunePtr, const int *PruneSet);
 
 
     /*
@@ -368,7 +355,7 @@ namespace sym_lib
      * index set in CSR format of row j of the input matrix
      */
     bool spic0_csc_LL_serial_test(int n, const int *Lp, const int *Li, double *Lx,
-                             const int* PrunePtr, const int* PruneSet);
+                                  const int *PrunePtr, const int *PruneSet);
 
     /*
      * @brief left looking incomplete cholesky
@@ -387,7 +374,7 @@ namespace sym_lib
      * @param groupSet the array set for groups. Nodes are sorted based on their group
      */
     bool spic0_csc_LL_group_Levelset(int n, const int *Lp, const int *Li, double *Lx,
-                                     const int* PrunePtr, const int* PruneSet,
+                                     const int *PrunePtr, const int *PruneSet,
                                      int levels, const int *levelPtr, const int *levelSet,
                                      int *groupPtr, int *groupSet);
 
@@ -406,8 +393,8 @@ namespace sym_lib
      * @param LevelSet The nodes sorted based on the level in this array
      */
     bool spic0_csc_LL_Levelset(int n, const int *Lp, const int *Li, double *Lx,
-                               const int* PrunePtr, const int* PruneSet,
-                               int nLevels, const int* LevelPtr, const int* LevelSet);
+                               const int *PrunePtr, const int *PruneSet,
+                               int nLevels, const int *LevelPtr, const int *LevelSet);
 
 
     /*
@@ -424,8 +411,8 @@ namespace sym_lib
      * @param Partitions: the nodes sorted based on the w-partitions that they are in
      */
     bool spic0_csc_LL_LBC(int n, const int *Lp, const int *Li, double *Lx,
-                          const int* PrunePtr, const int* PruneSet,
-                          int nLevels, const int* LevelPtr, const int* ParPtr, const int* Partitions);
+                          const int *PrunePtr, const int *PruneSet,
+                          int nLevels, const int *LevelPtr, const int *ParPtr, const int *Partitions);
 
     /*
      * @brief left looking incomplete cholesky
@@ -443,9 +430,9 @@ namespace sym_lib
      * @param groupSet the array set for groups. Nodes are sorted based on their group
      */
     bool spic0_csc_LL_group_LBC(int n, const int *Lp, const int *Li, double *Lx,
-                                     const int* PrunePtr, const int* PruneSet,
-                                     int nLevels, const int* LevelPtr, const int* ParPtr, const int* Partitions,
-                                     int *groupPtr, int *groupSet);
+                                const int *PrunePtr, const int *PruneSet,
+                                int nLevels, const int *LevelPtr, const int *ParPtr, const int *Partitions,
+                                int *groupPtr, int *groupSet);
 
 
     ///\description: This function do a dot product on two rows in CSR format
@@ -456,7 +443,7 @@ namespace sym_lib
     ///\input indices: Is the index array (stores column indices of row 1 and row 2)
     ///\input data: Is the current partial factorized matrix
     ///\output The dot product of the two rows EXCLUDING diagonal index of the smaller row (the one with smaller index)
-    inline double sparse_dot_product(int l1, int u1, int l2, int u2, const int* indices, const double* data);
+    inline double sparse_dot_product(int l1, int u1, int l2, int u2, const int *indices, const double *data);
 
 
     ///\description: This function perform an incomplete up-looking cholesky factorization
@@ -476,8 +463,8 @@ namespace sym_lib
     ///\input Lx: Value array in CSR format
     ///\input new_data: The output buffer filled with zero
     ///\output is the pointer same as new_data
-    bool spic0_csr_UL_Levelset(int n, const int *Lp, const int *Li, double *Lx, double* new_data,
-                               int nLevels, const int* LevelPtr, const int* LevelSet);
+    bool spic0_csr_UL_Levelset(int n, const int *Lp, const int *Li, double *Lx, double *new_data,
+                               int nLevels, const int *LevelPtr, const int *LevelSet);
 
 
     ///\description: This function perform an incomplete up-looking cholesky factorization with levelset scheduling
@@ -492,9 +479,9 @@ namespace sym_lib
     ///\input LevelSet: The output buffer filled with zero
     ///\input group_ptr: The group_ptr array that define groups in group_set array
     ///\input group_set: Array with sorted nodes based on their group
-    bool spic0_csr_UL_group_Levelset(int n, const int *Lp, const int *Li, double *Lx, double* new_data,
-                                     int nLevels, const int* LevelPtr, const int* LevelSet,
-                                     const int* group_ptr, const int* group_set);
+    bool spic0_csr_UL_group_Levelset(int n, const int *Lp, const int *Li, double *Lx, double *new_data,
+                                     int nLevels, const int *LevelPtr, const int *LevelSet,
+                                     const int *group_ptr, const int *group_set);
 
     ///\description: This function perform an incomplete up-looking cholesky factorization with LC scheduling
     ///\input n: number of columns/rows
@@ -503,8 +490,8 @@ namespace sym_lib
     ///\input Lx: Value array in CSR format
     ///\input new_data: The output buffer filled with zero
     ///\output is the pointer same as new_data
-    bool spic0_csr_UL_LBC(int n, const int *Lp, const int *Li, double *Lx, double* new_data,
-                          int nLevels, const int* LevelPtr, const int* ParPtr, const int* Partitions);
+    bool spic0_csr_UL_LBC(int n, const int *Lp, const int *Li, double *Lx, double *new_data,
+                          int nLevels, const int *LevelPtr, const int *ParPtr, const int *Partitions);
 
 
     //===========================================================================================
@@ -531,7 +518,8 @@ namespace sym_lib
     ///\Input double Ax[NZ_NUM], the matrix values.
     ///\Input int A_diag[N], the index of the diagonal element of each row.
     ///\Output double l[NZ_NUM], the ILU factorization of A.
-    void spilu0_ul_csr_serial(int n, int nnz, const int *Ap, const int *Ai, const double *Ax, const int *A_diag, double *l);
+    void
+    spilu0_ul_csr_serial(int n, int nnz, const int *Ap, const int *Ai, const double *Ax, const int *A_diag, double *l);
 
 
     ///\Description: The Levelset algorithm for incomplete LU decomposition with zero fill-in
@@ -548,7 +536,7 @@ namespace sym_lib
     ///\Input temp: A variable used in the executor. Should have the same size of the full value array
     void spilu0_ul_csr_levelset(int n, int nz_num, const int *Ap, const int *Ai,
                                 const double *Ax, const int *A_diag, double *l,
-                                int nLevels, const int* LevelPtr, const int* LevelSet, int* temp);
+                                int nLevels, const int *LevelPtr, const int *LevelSet, int *temp);
 
 
     ///\Description: The Levelset algorithm for incomplete LU decomposition with zero fill-in
@@ -569,8 +557,8 @@ namespace sym_lib
     ///\Input temp: A variable used in the executor. Should have the same size of the full value array
     void spilu0_ul_csr_group_levelset(int n, int nnz, const int *Ap, const int *Ai,
                                       const double *Ax, const int *A_diag, double *l,
-                                      int nLevels, const int* LevelPtr, const int* LevelSet,
-                                      const int* group_ptr, const int* group_set, int* temp);
+                                      int nLevels, const int *LevelPtr, const int *LevelSet,
+                                      const int *group_ptr, const int *group_set, int *temp);
 
     ///\Description: The Serial algorithm for incomplete LU decomposition with zero fill-in
     ///\Input int N, the order of the system.
@@ -586,14 +574,14 @@ namespace sym_lib
     ///\Input partition Nodes' id sorted based on their partition
     void spilu0_ul_csr_lbc(int n, int nnz, const int *Ap, const int *Ai,
                            const double *Ax, const int *A_diag, double *l,
-                           int level_no, const int* level_ptr, const int* par_ptr, const int* partition, int* temp);
+                           int level_no, const int *level_ptr, const int *par_ptr, const int *partition, int *temp);
 
 
     //===========================================================================================
     //                                 Sparse Incomplete IC with K fill-ins
     //===========================================================================================
     bool spick_csr_UL_serial(int n, const int *Lp, const int *Li, double *Lx,
-                             double *new_Lp, double* new_Li, double* new_Lx, double& new_nnz);
+                             double *new_Lp, double *new_Li, double *new_Lx, double &new_nnz);
 
 
 } // namespace sym_lib

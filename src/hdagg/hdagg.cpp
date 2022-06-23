@@ -2,7 +2,7 @@
 // Created by behrooz on 2021-07-11.
 //
 
-#include <glc.h>
+#include <hdagg.h>
 #include <unordered_set>
 #include <sparse_utilities.h>
 #include <list>
@@ -10,7 +10,7 @@
 #include <set>
 
 
-namespace GLC
+namespace HDAGG
 {
     int build_levelSet_CSC(size_t n, const int *Lp, const int *Li,
                            int *levelPtr, int *levelSet, int* node_to_level)
@@ -604,17 +604,17 @@ namespace GLC
     }
 
 
-    std::vector<int> GLC(int n, int nnz,
-             std::vector<int> & DAG_ptr_not_prune, std::vector<int> & DAG_set_not_prune,
-             const std::vector<double> & node_cost,
-             int cores,
-             int & coarse_level_no,
-             std::vector<int> & coarse_level_ptr,
-             std::vector<int> & coarse_part_ptr,
-             std::vector<int> & coarse_node_ptr,
-             bool parallelLevelset,
-             bool postOrder,
-             bool bin_pack){
+    std::vector<int> HDAGG(int n, int nnz,
+                           std::vector<int> & DAG_ptr_not_prune, std::vector<int> & DAG_set_not_prune,
+                           const std::vector<double> & node_cost,
+                           int cores,
+                           int & coarse_level_no,
+                           std::vector<int> & coarse_level_ptr,
+                           std::vector<int> & coarse_part_ptr,
+                           std::vector<int> & coarse_node_ptr,
+                           bool parallelLevelset,
+                           bool postOrder,
+                           bool bin_pack){
 
         auto DAG_ptr = DAG_ptr_not_prune.data();
         auto DAG_set = DAG_set_not_prune.data();
@@ -623,7 +623,9 @@ namespace GLC
         std::vector<int> level_set;
         std::vector<int> node_to_level(n, 0);
         int nlevels;
+
         if(parallelLevelset){
+#ifdef SpMP
             //Create the CSC version of the codeto use make_full and csc_to_csr codes
             CSC* Lower_A_CSC = new CSC(n, n, nnz);
             std::copy(DAG_ptr, DAG_ptr + n + 1, Lower_A_CSC->p);
@@ -633,8 +635,8 @@ namespace GLC
             auto tmp = sym_lib::make_full(Lower_A_CSC);
             auto CSR_A = sym_lib::csc_to_csr(tmp);
             auto A = new SpMP::CSR();
-            GLC::Convert_LBC_CSR_to_SpMP(CSR_A, A);
-            nlevels = GLC::levelsetCSRParallel_SpMP(A, cores, level_ptr, level_set);
+            HDAGG::Convert_LBC_CSR_to_SpMP(CSR_A, A);
+            nlevels = HDAGG::levelsetCSRParallel_SpMP(A, cores, level_ptr, level_set);
             for(int l = 0; l < nlevels; l++){
                 for(int node_ptr = level_ptr[l]; node_ptr < level_ptr[l + 1]; node_ptr++){
                     int node = level_set[node_ptr];
@@ -645,6 +647,7 @@ namespace GLC
             delete tmp;
             delete A;
             delete CSR_A;
+#endif
         } else {
             //Create the Levelset and compute node_to_level
             level_ptr.resize(n + 1);
@@ -836,6 +839,7 @@ namespace GLC
         int nlevels;
 
         if(parallelLevelset){
+#ifdef SPMP
             std::cerr << "Parallel levelset is still under construction" << std::endl;
             //Create the CSC version of the codeto use make_full and csc_to_csr codes
             CSC* Lower_A_CSC = new CSC(n, n, nnz);
@@ -846,8 +850,8 @@ namespace GLC
             auto tmp = sym_lib::make_full(Lower_A_CSC);
             auto CSR_A = sym_lib::csc_to_csr(tmp);
             auto A = new SpMP::CSR();
-            GLC::Convert_LBC_CSR_to_SpMP(CSR_A, A);
-            nlevels = GLC::levelsetCSRParallel_SpMP(A, cores, level_ptr, level_set);
+            HDAGG::Convert_LBC_CSR_to_SpMP(CSR_A, A);
+            nlevels = HDAGG::levelsetCSRParallel_SpMP(A, cores, level_ptr, level_set);
             for(int l = 0; l < nlevels; l++){
                 for(int node_ptr = level_ptr[l]; node_ptr < level_ptr[l + 1]; node_ptr++){
                     int node = level_set[node_ptr];
@@ -858,6 +862,7 @@ namespace GLC
             delete tmp;
             delete A;
             delete CSR_A;
+#endif
         } else {
             //Create the Levelset and compute node_to_level
             level_ptr.resize(n + 1);
@@ -1221,7 +1226,7 @@ namespace GLC
         }
         std::cout << "WTF? " << avg_supernode_size << "\t" << cnt << std::endl;
         avg_supernode_size = avg_supernode_size / cnt;
-        std::cout << "Average supernode size after GLC is: " << avg_supernode_size << std::endl;
+        std::cout << "Average supernode size after HDAGG is: " << avg_supernode_size << std::endl;
 
         return avg_supernode_size;
     }
@@ -2518,11 +2523,11 @@ namespace GLC
         assert(group_ptr.back() == n);
 
         //Create DAG
-        GLC::buildGroupDAG(n, ngroups, group_ptr.data(), group_set.data(),
-                           orig_DAG_ptr, orig_DAG_set, DAG_ptr, DAG_set);
+        HDAGG::buildGroupDAG(n, ngroups, group_ptr.data(), group_set.data(),
+                             orig_DAG_ptr, orig_DAG_set, DAG_ptr, DAG_set);
     }
 
-
+#ifdef SPMP
     int levelsetCSRParallel_SpMP(SpMP::CSR* A, int nthreads,
                                  std::vector<int>& level_ptr, std::vector<int>& level_set){
         int nlevels = 0;
@@ -2593,4 +2598,5 @@ namespace GLC
             }
         }
     }
+#endif
 }
