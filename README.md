@@ -40,7 +40,7 @@ First following items should be installed:
 The cmake currently supports mkl library inside oneapi. To use it, please provide `$MKLROOT` environmental variable using `export MKLROOT=<your-address>/make/latest`.  
 * For example: `export MKLROOT=/opt/intel/oneapi/mkl/latest/` 
 
-#### Relative Works:
+#### Relative Works
 
 You can switch the `HDAGG_WITH_SPMP` and `HDAGG_WITH_DAGP` options in `CMakeLists.txt` 
 to add the [SpMP](https://github.com/IntelLabs/SpMP) or [DAGP](https://github.com/GT-TDAlab/dagP). To use these tools,
