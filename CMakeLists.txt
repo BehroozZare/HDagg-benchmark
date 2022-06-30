@@ -29,7 +29,7 @@ project(HDAGG DESCRIPTION "A upgraded version of LBC library with HDagg function
 ################################################################################
 
 #Project options
-option(HDAGG_WITH_SPMP "Use SpMP library with HDAGG" OFF)
+option(HDAGG_WITH_SPMP "Use SpMP library with HDAGG" ON)
 option(HDAGG_WITH_DAGP "Add DAGP for benchmarking" OFF)
 
 option(HDAGG_WITH_DEMO "Add demo executables" ON)
