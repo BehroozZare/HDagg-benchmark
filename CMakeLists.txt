@@ -34,8 +34,6 @@ option(HDAGG_WITH_DAGP "Add DAGP for benchmarking" OFF)
 
 option(HDAGG_WITH_DEMO "Add demo executables" ON)
 
-
-
 ################################################################################
 
 ### Configuration
@@ -133,27 +131,20 @@ else()
     message(STATUS "PAPI is not found.")
 endif()
 
+## Find Intel MKL if available
+
+
 ### Find Intel MKL if available
 find_package(MKL OPTIONAL_COMPONENTS)
-if(EXISTS "${MKL_INCLUDE_DIRS}")
-    target_include_directories(${PROJECT_NAME}_lib PUBLIC
-            ${MKL_INCLUDE_DIRS}
-            )
-    target_link_libraries(${PROJECT_NAME}_lib PUBLIC
-            ${MKL_GNU_THREAD}
-            ${PTHREAD}
-            ${IOMP5}
-            ${MKL_SEQUENTIAL}
-            ${MKL_INTEL_THREAD}
-            ${MKL_CORE}
-            ${M}
-            ${DL}
-            )
-
-else()
-    message(STATUS "Intel MKL not found, building without MKL.")
+if (EXISTS "${MKL_INCLUDE_DIRS}")
+    message(STATUS "The MKL has been found")
+    target_include_directories(${PROJECT_NAME}_lib PUBLIC "${MKL_INCLUDE_DIRS}")
+    target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${MKL_LIBRARIES})
+else ()
+    message(STATUS "Intel MKL not found.")
+    set(MKL_LIBRARIES "")
     set(MKL 0)
-endif()
+endif ()
 
 
 ### Check whether DAGP root exists - Relative works
@@ -188,7 +179,7 @@ if(HDAGG_WITH_SPMP)
                 )
         add_definitions(-DSPMP)
     else()
-        message(STATUS "Please defined the SpMP directory using SPMP_ROOT variable - not found")
+        message(STATUS "Please defined the SpMP directory using SPMPROOT variable - not found")
     endif()
 endif()
 

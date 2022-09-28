@@ -217,6 +217,7 @@ int main(int argc, char *argv[]) {
 
     runtime_csv.addRecord();
   }
+#ifdef SPMP
   //"********************* LL Levelset *********************"
   for (auto &core : Cores) {
     SpTrsv_LL_Parallel_Wavefront LL_lvl_obj(CSR_A, Lower_A_CSR, Lower_A_CSC,
@@ -243,6 +244,7 @@ int main(int argc, char *argv[]) {
     runtime_csv.addElementToRecord(profitable, "Profitable");
     runtime_csv.addRecord();
   }
+#endif
   //"********************* LL Tree + Levelset *********************"
   for (auto &core : Cores) {
     SpTrSv_LL_Tree_Wavefront_No_unPACK LL_lvl_obj(
@@ -393,6 +395,7 @@ int main(int argc, char *argv[]) {
       runtime_csv.addRecord();
     }
   }
+#ifdef SPMP
   //"********************* LL Tree BFS HDAGG P2P *********************"
   for (auto &core : Cores) {
     for (auto &&bin : {false}) {
@@ -434,6 +437,7 @@ int main(int argc, char *argv[]) {
       runtime_csv.addRecord();
     }
   }
+#endif
   //"********************* LL LBC *********************"
   std::vector<int> P3 = {5000};
   for (auto core : Cores) {

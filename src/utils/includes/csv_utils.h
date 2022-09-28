@@ -112,6 +112,7 @@ namespace profiling_utils
                 std::cout << "There is no entry to add" << std::endl;
                 return;
             } else {
+                num_records++;
                 for(int i = 0; i < num_column; i++){
                     if(defined_record_status[i] == false){
                         std::cout << "The entry column " << column_names[i] << " is incomplete" << std::endl;
@@ -140,6 +141,12 @@ namespace profiling_utils
          * get headers
          */
         std::vector<std::string> getHeaderNames(){return this->column_names;}
+
+        /*
+         * get number of records
+         */
+        int getNumRecords(){return this->num_records;}
+
         ~CSVManager(){
             //close the file
             dataset_file.close();
